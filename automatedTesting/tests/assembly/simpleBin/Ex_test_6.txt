@@ -1,0 +1,21 @@
+addi t0,zero,4
+label1: bne s0,s1,8
+addi t0,zero,5
+addi s1,s1,1
+bne s0,s1,label2
+addi s1,s1,1
+blt s0,s1,8
+addi t0,zero,2
+blt s1,s0,label2
+label2: addi s0,s0,1
+bge s0,s1,8
+addi t0,zero,6
+addi s0,s0,1
+jal ra,8
+label1: jal t1,label3
+jal ra,label2
+jal s2,-4
+label2: jal ra,label1
+beq zero,zero,0
+label3: jal ra,-4
+beq zero,zero,0

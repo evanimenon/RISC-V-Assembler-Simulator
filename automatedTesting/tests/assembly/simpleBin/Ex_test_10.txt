@@ -1,0 +1,11 @@
+addi s0,s0,4
+add s1,zero,zero
+addi s1,zero,1
+add s2,s1,s1
+add s3,s2,s1
+addi s4,zero,-10
+sw s1,0(s0)
+sw s2,4(s0)
+sw s3,-4(s0)
+sw s4,8(s0)
+beq zero,zero,0

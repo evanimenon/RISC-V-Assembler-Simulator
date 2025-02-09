@@ -1,5 +1,0 @@
-## This is the main file for our assembler.
-
-print("This is an assembler made by Chitraksh, Evani, Emad and Nandika")
-
-print("Checking if changing works - git problems")

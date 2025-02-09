@@ -1,0 +1,10 @@
+sub s2,s2,s2
+jalr ra,a4,-03
+sw s3,s6(43)
+blt a3,400
+lw a4,30(s3)
+addi s3,s3,4
+sw s2,s8(38)
+add s2,s2,s3
+sw s4,50(a5)
+and a5,s2,s6
