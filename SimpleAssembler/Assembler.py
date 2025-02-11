@@ -7,4 +7,4 @@ def extract(file_name):
         print(operation," ",right)
     f.close()
 
-extract("Ex_test_5")
+extract("Ex_test_5.txt")
