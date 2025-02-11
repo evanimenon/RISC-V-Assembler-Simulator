@@ -51,7 +51,7 @@ riscv_registers = {
 
 
 def extract(file_name,riscv_instructions):
-    main={}
+    main={} # general structure to be {operation:{rd:"",rs1:"",rs2:""}}
     f = open(file_name,"r")
     for line in f:
         operation = line.split(" ")[0].strip()
