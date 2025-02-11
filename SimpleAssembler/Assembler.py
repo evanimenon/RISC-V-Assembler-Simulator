@@ -50,25 +50,32 @@ riscv_registers = {
 }
 
 
-def extract(file_name):
+def extract(file_name,riscv_instructions):
     main={}
     f = open(file_name,"r")
     for line in f:
         operation = line.split(" ")[0].strip()
+        main[operation] = {}
         right = line.split(" ")[1].strip()
+        if (riscv_instructions[operation.upper()]['func7'] =="" and riscv_instructions[operation.upper()]['func3'] ==""):
+            #something
+        elif (riscv_instructions[operation.upper()]['func7'] ==""):
+            #something
+        else:
+            #something
+
         rd = right.split(",")[0].strip()
         rs1 = right.split(",")[1].strip()
-        #rs2 = right.split(",")[2].strip()
-        main[operation] = {}
+        rs2 = right.split(",")[2].strip()
         main[operation]["rd"] = rd
         main[operation]["rs1"] = rs1
-        #main[operation]["rs2"] = rs2
+        main[operation]["rs2"] = rs2
     for i,j in main.items():
         print(i,j)
     f.close()
     return main
 
-extract("Ex_test_5.txt")
+extract("Ex_test_5.txt",riscv_instructions)
 
 #main logic of the code, loop it around for every operation and we're done
 main = {'instruction':['rd','rs1','rs2']}
