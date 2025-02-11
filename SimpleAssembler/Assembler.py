@@ -75,7 +75,7 @@ def extract(file_name,riscv_instructions):
     f.close()
     return main
 
-extract("Ex_test_5.txt",riscv_instructions)
+extract("instruction.txt",riscv_instructions)
 
 #main logic of the code, loop it around for every operation and we're done
 main = {'instruction':['rd','rs1','rs2']}
