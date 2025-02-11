@@ -59,3 +59,15 @@ def extract(file_name):
     f.close()
 
 extract("Ex_test_5.txt")
+
+#main logic of the code, loop it around for every operation and we're done
+main = {'instruction':['rd','rs1','rs2']}
+
+PC = ''
+PC += riscv_instructions['instruction'][2]
+#add rs2
+#add rs1
+PC += riscv_instructions['instruction'][1]
+#add rd
+PC += riscv_instructions['instruction'][0]
+print(PC)
