@@ -1,42 +1,71 @@
-riscv_instructions = {
-    "ADD":      {'opcode':"0110011",'func3': "000", 'func7': "0000000"},
-    "SUB":      {'opcode':"0110011",'func3': "000", 'func7': "0100000"},
-    "SLL":      {'opcode':"0110011",'func3': "001", 'func7': "0000000"},
-    "SLT":      {'opcode':"0110011",'func3': "010", 'func7': "0000000"},
-    "SLTU":     {'opcode':"0110011",'func3': "011", 'func7': "0000000"},
-    "XOR":      {'opcode':"0110011",'func3': "100", 'func7': "0000000"},
-    "SRL":      {'opcode':"0110011",'func3': "101", 'func7': "0000000"},
-    "SRA":      {'opcode':"0110011",'func3': "101", 'func7': "0100000"},
-    "OR":       {'opcode':"0110011",'func3': "110", 'func7': "0000000"},
-    "AND":      {'opcode':"0110011",'func3': "111", 'func7': "0000000"},
-    "ADDI":     {'opcode':"0010011",'func3': "000", 'func7': ""},
-    "SLLI":     {'opcode':"0010011",'func3': "001", 'func7': "0000000"},
-    "SLTI":     {'opcode':"0010011",'func3': "010", 'func7': ""},
-    "SLTIU":    {'opcode':"0010011",'func3': "011", 'func7': ""},
-    "XORI":     {'opcode':"0010011",'func3': "100", 'func7': ""},
-    "SRLI":     {'opcode':"0010011",'func3': "101", 'func7': "0000000"},
-    "SRAI":     {'opcode':"0010011",'func3': "101", 'func7': "0100000"},
-    "ORI":      {'opcode':"0010011",'func3': "110", 'func7': ""},
-    "ANDI":     {'opcode':"0010011",'func3': "111", 'func7': ""},
-    "LB":       {'opcode':"0000011",'func3': "000", 'func7': ""},
-    "LH":       {'opcode':"0000011",'func3': "001", 'func7': ""},
-    "LW":       {'opcode':"0000011",'func3': "010", 'func7': ""},
-    "LBU":      {'opcode':"0000011",'func3': "100", 'func7': ""},
-    "LHU":      {'opcode':"0000011",'func3': "101", 'func7': ""},
-    "SB":       {'opcode':"0100011",'func3': "000", 'func7': ""},
-    "SH":       {'opcode':"0100011",'func3': "001", 'func7': ""},
-    "SW":       {'opcode':"0100011",'func3': "010", 'func7': ""},
-    "BEQ":      {'opcode':"1100011",'func3': "000", 'func7': ""},
-    "BNE":      {'opcode':"1100011",'func3': "001", 'func7': ""},
-    "BLT":      {'opcode':"1100011",'func3': "100", 'func7': ""},
-    "BGE":      {'opcode':"1100011",'func3': "101", 'func7': ""},
-    "BLTU":     {'opcode':"1100011",'func3': "110", 'func7': ""},
-    "BGEU":     {'opcode':"1100011",'func3': "111", 'func7': ""},
-    "JAL":      {'opcode':"1101111",'func3': "", 'func7': ""},
-    "JALR":     {'opcode':"1100111",'func3': "000", 'func7': ""},
-    "LUI":      {'opcode':"0110111",'func3': "", 'func7': ""},
-    "AUIPC":    {'opcode':"0010111",'func3': "", 'func7': ""}
+import sys
+
+riscv_r_type = {  
+    "ADD":  {"opcode": "0110011", "func3": "000", "func7": "0000000"},  
+    "SUB":  {"opcode": "0110011", "func3": "000", "func7": "0100000"},  
+    "AND":  {"opcode": "0110011", "func3": "111", "func7": "0000000"},  
+    "OR":   {"opcode": "0110011", "func3": "110", "func7": "0000000"},  
+    "XOR":  {"opcode": "0110011", "func3": "100", "func7": "0000000"},  
+    "SLL":  {"opcode": "0110011", "func3": "001", "func7": "0000000"},  
+    "SRL":  {"opcode": "0110011", "func3": "101", "func7": "0000000"},  
+    "SRA":  {"opcode": "0110011", "func3": "101", "func7": "0100000"},  
+    "SLT":  {"opcode": "0110011", "func3": "010", "func7": "0000000"},  
+    "SLTU": {"opcode": "0110011", "func3": "011", "func7": "0000000"}  
 }
+
+riscv_i_type = {  
+    "ADDI": {"opcode": "0010011", "func3": "000", "func7": ""},  
+    "ANDI": {"opcode": "0010011", "func3": "111", "func7": ""},  
+    "ORI":  {"opcode": "0010011", "func3": "110", "func7": ""},  
+    "XORI": {"opcode": "0010011", "func3": "100", "func7": ""},  
+    "SLLI": {"opcode": "0010011", "func3": "001", "func7": "0000000"},  
+    "SRLI": {"opcode": "0010011", "func3": "101", "func7": "0000000"},  
+    "SRAI": {"opcode": "0010011", "func3": "101", "func7": "0100000"},  
+    "LW":   {"opcode": "0000011", "func3": "010", "func7": ""},  
+    "JALR": {"opcode": "1100111", "func3": "000", "func7": ""}  
+}
+
+riscv_s_type = {  
+    "SW":   {"opcode": "0100011", "func3": "010", "func7": ""},  
+    "SB":   {"opcode": "0100011", "func3": "000", "func7": ""},  
+    "SH":   {"opcode": "0100011", "func3": "001", "func7": ""}  
+}
+
+riscv_b_type = {  
+    "BEQ":  {"opcode": "1100011", "func3": "000", "func7": ""},  
+    "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""},  
+    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""},  
+    "BGE":  {"opcode": "1100011", "func3": "101", "func7": ""},  
+    "BLTU": {"opcode": "1100011", "func3": "110", "func7": ""},  
+    "BGEU": {"opcode": "1100011", "func3": "111", "func7": ""}  
+}
+
+riscv_u_type = {  
+    "LUI":   {"opcode": "0110111", "func3": "", "func7": ""},  
+    "AUIPC": {"opcode": "0010111", "func3": "", "func7": ""}  
+}
+
+riscv_j_type = {  
+    "JAL": {"opcode": "1101111", "func3": "", "func7": ""}  
+}
+
+
+def get_instruction_type(instr):
+    #Checks which type the instruction belongs to
+    if instr in riscv_r_type:
+        return "R"
+    elif instr in riscv_i_type:
+        return "I"
+    elif instr in riscv_s_type:
+        return "S"
+    elif instr in riscv_b_type:
+        return "B"
+    elif instr in riscv_u_type:
+        return "U"
+    elif instr in riscv_j_type:
+        return "J"
+    else:
+        return "UNKNOWN"
 
 riscv_registers = {
     "x0":  "00000", "x1":  "00001", "x2":  "00010", "x3":  "00011",
