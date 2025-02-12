@@ -111,9 +111,21 @@ def get_instruction_type(instr,data):
         Binary_Instruction.append(PC)
 
     elif instr in riscv_u_type:
-        return "U"
+        rd, imm = data.split(',')
+        imm_bin = int_to_binary(int(imm), 20)   	
+        PC += imm_bin + ' ' + riscv_registers[rd] + ' ' + riscv_u_type[instr]['opcode']
+        Binary_Instruction.append(PC)
+        
     elif instr in riscv_j_type:
-        return "J"
+        rd, imm = data.split(',')
+        imm_bin = int_to_binary(int(imm), 21)
+        imm_msb  = imm_bin[0]
+        imm_high = imm_bin[1:11]
+        imm_sep  = imm_bin[11]
+        imm_low  = imm_bin[12:20]
+        PC += imm_msb + ' ' + imm_high + ' ' + imm_sep + ' ' + imm_low + ' ' + riscv_registers[rd] + ' ' + riscv_j_type[instr]['opcode']
+        Binary_Instruction.append(PC)
+        
     else:
         return "UNKNOWN"
     return PC
