@@ -50,12 +50,47 @@ riscv_j_type = {
 }
 
 
-def get_instruction_type(instr):
+def int_to_binary(value, bit_width):
+    """
+    Convert an integer to its two's complement binary representation.
+    
+    :param value: The integer value to convert.
+    :param bit_width: The number of bits to represent the value.
+    :return: A string representing the binary two's complement representation.
+    """
+    if value < 0:
+        value = (2 ** bit_width) + value  # Compute two's complement for negative numbers
+    
+    binary_representation = format(value & ((2 ** bit_width) - 1), f'0{bit_width}b')
+    return binary_representation
+    
+
+def get_instruction_type(instr,data):
+    Binary_Instruction = []
+    PC = ''
     #Checks which type the instruction belongs to
+    #note to self: instr and data are both strings
     if instr in riscv_r_type:
-        return "R"
+        Operands = data.split(',')
+        PC += riscv_r_type[instr]['func7'] + ' ' + riscv_registers[Operands[2]] + ' ' + riscv_registers[Operands[1]] + ' ' + riscv_r_type[instr]['func3'] + ' ' + riscv_registers[Operands[0]] + ' ' + riscv_r_type[instr]['opcode']
+        #Above line is for conversion
+        Binary_Instruction.append(PC)
+
     elif instr in riscv_i_type:
-        return "I"
+        info = data.split(',')
+        Operands = [info[0],0,0]
+        if instr in "JALRLW":
+            Operands[1] = info[1].split('(')[1].strip(')')
+            Operands[2] = int_to_binary(int(info[1].split('(')[0]),12)
+            PC += Operands[2] + ' ' + riscv_registers[Operands[1]] + ' ' + riscv_i_type[instr]['func3'] + ' ' + riscv_registers[Operands[0]] + ' ' + riscv_i_type[instr]['opcode']
+            Binary_Instruction.append(PC)
+        else:
+            Operands[1] = info[1]
+            Operands[2] = int_to_binary(int(info[2]),12)
+            PC += Operands[2] + ' ' + riscv_registers[Operands[1]] + ' ' + riscv_i_type[instr]['func3'] + ' ' + riscv_registers[Operands[0]] + ' ' + riscv_i_type[instr]['opcode']
+
+
+
     elif instr in riscv_s_type:
         return "S"
     elif instr in riscv_b_type:
@@ -66,6 +101,7 @@ def get_instruction_type(instr):
         return "J"
     else:
         return "UNKNOWN"
+    return PC
 
 riscv_registers = {
     "x0":  "00000", "x1":  "00001", "x2":  "00010", "x3":  "00011",
@@ -91,16 +127,8 @@ def extract(file_name):
     f.close()
     return main
 
-extract("instruction.txt")
-
-#main logic of the code, loop it around for every operation and we're done
-main = {'instruction':['rd','rs1','rs2']}
-
-PC = ''
-#PC += riscv_instructions['instruction'][2]
-#add rs2
-#add rs1
-#PC += riscv_instructions['instruction'][1]
-#add rd
-#PC += riscv_instructions['instruction'][0]
-print(PC)
+main = extract("instruction.txt")
+count = 1
+for key in main:
+    print(count,' ' + get_instruction_type(key,main[key]))
+    count+=1
