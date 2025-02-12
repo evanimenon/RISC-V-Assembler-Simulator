@@ -79,41 +79,28 @@ riscv_registers = {
 }
 
 
-def extract(file_name,riscv_instructions):
-    main={} # general structure to be {operation:{rd:"",rs1:"",rs2:""}}
+def extract(file_name):
+    main={} # general structure to be {operation:data}
     f = open(file_name,"r")
     for line in f:
         operation = line.split(" ")[0].strip()
-        main[operation] = {}
-        right = line.split(" ")[1].strip()
-        if (riscv_instructions[operation.upper()]['func7'] =="" and riscv_instructions[operation.upper()]['func3'] ==""):
-            #something
-        elif (riscv_instructions[operation.upper()]['func7'] ==""):
-            #something
-        else:
-            #something
-
-        rd = right.split(",")[0].strip()
-        rs1 = right.split(",")[1].strip()
-        rs2 = right.split(",")[2].strip()
-        main[operation]["rd"] = rd
-        main[operation]["rs1"] = rs1
-        main[operation]["rs2"] = rs2
+        data = line.split(" ")[1].strip()
+        main[operation] = data
     for i,j in main.items():
         print(i,j)
     f.close()
     return main
 
-extract("instruction.txt",riscv_instructions)
+extract("instruction.txt")
 
 #main logic of the code, loop it around for every operation and we're done
 main = {'instruction':['rd','rs1','rs2']}
 
 PC = ''
-PC += riscv_instructions['instruction'][2]
+#PC += riscv_instructions['instruction'][2]
 #add rs2
 #add rs1
-PC += riscv_instructions['instruction'][1]
+#PC += riscv_instructions['instruction'][1]
 #add rd
-PC += riscv_instructions['instruction'][0]
+#PC += riscv_instructions['instruction'][0]
 print(PC)
