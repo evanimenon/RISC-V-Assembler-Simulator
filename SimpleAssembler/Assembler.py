@@ -89,12 +89,27 @@ def get_instruction_type(instr,data):
             Operands[2] = int_to_binary(int(info[2]),12)
             PC += Operands[2] + ' ' + riscv_registers[Operands[1]] + ' ' + riscv_i_type[instr]['func3'] + ' ' + riscv_registers[Operands[0]] + ' ' + riscv_i_type[instr]['opcode']
 
-
-
     elif instr in riscv_s_type:
-        return "S"
+        rs2, offset_rs1 = data.split(',')
+        offset, rs1 = offset_rs1.split('(')
+        rs1 = rs1.strip(')')
+
+        imm_bin = int_to_binary(int(offset), 12)
+        imm_high, imm_low = imm_bin[:7], imm_bin[7:]
+
+        PC += (imm_high + ' ' + riscv_registers[rs2] + ' ' + riscv_registers[rs1] + ' ' +
+               riscv_s_type[instr]['func3'] + ' ' + imm_low + ' ' + riscv_s_type[instr]['opcode'])
+        Binary_Instruction.append(PC)
+
     elif instr in riscv_b_type:
-        return "B"
+        rs1, rs2, offset = data.split(',')
+        imm_bin = int_to_binary(int(offset), 12)
+        imm_high, imm_low = imm_bin[:7], imm_bin[7:]
+
+        PC += (imm_high + ' ' + riscv_registers[rs2] + ' ' + riscv_registers[rs1] + ' ' + 
+               riscv_b_type[instr]['func3'] + ' ' + imm_low + ' ' + riscv_b_type[instr]['opcode'])
+        Binary_Instruction.append(PC)
+
     elif instr in riscv_u_type:
         return "U"
     elif instr in riscv_j_type:
