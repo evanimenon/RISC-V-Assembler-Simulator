@@ -1,0 +1,8 @@
+addi s0,s0,1
+sub t3,zero,s0
+add s1,s0,s0
+slt t0,s0,s1
+slt t1,s1,s0
+srl a2,t2,s0
+srl a3,t2,t2
+beq zero,zero,0
