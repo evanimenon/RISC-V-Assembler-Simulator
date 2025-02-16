@@ -7,4 +7,4 @@ sw s4,23(s4)
 sub s9,s1,s3
 or s1,s9,s7
 srl s10,a2,a4
-beq zero,zero,0
+beq zero,zero,0s
