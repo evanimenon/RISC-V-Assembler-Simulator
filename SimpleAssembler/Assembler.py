@@ -116,22 +116,25 @@ riscv_registers = {
 }
 
 def extract(file_name):
-    main={} # general structure to be {operation:data}
+    main={} # general structure to be {address:{operation:data}}
     f = open(file_name,"r")
+    count = 0
     for line in f:
         operation = line.split(" ")[0].strip()
         data = line.split(" ")[1].strip()
-        main[operation.strip().upper()] = data
+        main[count] = {operation.strip().upper():data}
+        count+=1
     f.close()
     return main
 
 def write(main):
     f = open("binary.txt",'w')
     for i,j in main.items():
-        bin = get_instruction_type(i,j)
-        print(bin)
-        f.write(bin) 
-        f.write("\n")
+        for k,g in j.items():
+            bin = get_instruction_type(k,g)
+            print(bin)
+            f.write(bin) 
+            f.write("\n")
     f.close()
     return main
 
