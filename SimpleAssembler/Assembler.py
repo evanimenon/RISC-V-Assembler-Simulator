@@ -30,7 +30,7 @@ riscv_j_type = {
 }
 
 
-def int_to_binary(value, bit_width):
+def inttobin(value, bit_width):
     if value < 0:
         value = (2 ** bit_width) + value
     
@@ -38,7 +38,7 @@ def int_to_binary(value, bit_width):
     return binary_representation
     
 
-def get_instruction_type(instr,data):
+def conversion(instr,data):
     PC = ''
     #Checks which type the instruction belongs to
     #note to self: instr and data are both strings
@@ -53,11 +53,11 @@ def get_instruction_type(instr,data):
         try:
             if instr in "LW":
                 Operands[1] = info[1].split('(')[1].strip(')')
-                Operands[2] = int_to_binary(int(info[1].split('(')[0]),12)
+                Operands[2] = inttobin(int(info[1].split('(')[0]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
             else:
                 Operands[1] = info[1]
-                Operands[2] = int_to_binary(int(info[2]),12)
+                Operands[2] = inttobin(int(info[2]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
         except:
             return "UNKNOWN"
@@ -67,7 +67,7 @@ def get_instruction_type(instr,data):
         offset, rs1 = offset_rs1.split('(')
         rs1 = rs1.strip(')')
 
-        imm_bin = int_to_binary(int(offset), 12)
+        imm_bin = inttobin(int(offset), 12)
         imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
         PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] +
@@ -76,7 +76,7 @@ def get_instruction_type(instr,data):
     elif instr in riscv_b_type:
         try:
             rs1, rs2, offset = data.split(',')
-            imm_bin = int_to_binary(int(offset), 12)
+            imm_bin = inttobin(int(offset), 12)
             imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
             PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
@@ -87,7 +87,7 @@ def get_instruction_type(instr,data):
     elif instr in riscv_j_type:
         try:
             rd, imm = data.split(',')
-            imm_bin = int_to_binary(int(imm), 21)
+            imm_bin = inttobin(int(imm), 21)
             imm_msb  = imm_bin[0]
             imm_high = imm_bin[1:11]
             imm_sep  = imm_bin[11]
@@ -130,11 +130,18 @@ def extract(file_name):
 def write(main):
     f = open("binary.txt",'w')
     for i,j in main.items():
+<<<<<<< Updated upstream
         for k,g in j.items():
             bin = get_instruction_type(k,g)
             print(bin)
             f.write(bin) 
             f.write("\n")
+=======
+        bin = conversion(i,j)
+        print(bin)
+        f.write(bin) 
+        f.write("\n")
+>>>>>>> Stashed changes
     f.close()
     return main
 
