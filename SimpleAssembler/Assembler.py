@@ -4,45 +4,25 @@ riscv_r_type = {
     "ADD":  {"opcode": "0110011", "func3": "000", "func7": "0000000"},  
     "SUB":  {"opcode": "0110011", "func3": "000", "func7": "0100000"},  
     "AND":  {"opcode": "0110011", "func3": "111", "func7": "0000000"},  
-    "OR":   {"opcode": "0110011", "func3": "110", "func7": "0000000"},  
-    "XOR":  {"opcode": "0110011", "func3": "100", "func7": "0000000"},  
-    "SLL":  {"opcode": "0110011", "func3": "001", "func7": "0000000"},  
-    "SRL":  {"opcode": "0110011", "func3": "101", "func7": "0000000"},  
-    "SRA":  {"opcode": "0110011", "func3": "101", "func7": "0100000"},  
-    "SLT":  {"opcode": "0110011", "func3": "010", "func7": "0000000"},  
-    "SLTU": {"opcode": "0110011", "func3": "011", "func7": "0000000"}  
+    "OR":   {"opcode": "0110011", "func3": "110", "func7": "0000000"},      
+    "SRL":  {"opcode": "0110011", "func3": "101", "func7": "0000000"},    
+    "SLT":  {"opcode": "0110011", "func3": "010", "func7": "0000000"}  
 }
 
 riscv_i_type = {  
-    "ADDI": {"opcode": "0010011", "func3": "000", "func7": ""},  
-    "ANDI": {"opcode": "0010011", "func3": "111", "func7": ""},  
-    "ORI":  {"opcode": "0010011", "func3": "110", "func7": ""},  
-    "XORI": {"opcode": "0010011", "func3": "100", "func7": ""},  
-    "SLLI": {"opcode": "0010011", "func3": "001", "func7": "0000000"},  
-    "SRLI": {"opcode": "0010011", "func3": "101", "func7": "0000000"},  
-    "SRAI": {"opcode": "0010011", "func3": "101", "func7": "0100000"},  
+    "ADDI": {"opcode": "0010011", "func3": "000", "func7": ""},    
     "LW":   {"opcode": "0000011", "func3": "010", "func7": ""},  
     "JALR": {"opcode": "1100111", "func3": "000", "func7": ""}  
 }
 
 riscv_s_type = {  
-    "SW":   {"opcode": "0100011", "func3": "010", "func7": ""},  
-    "SB":   {"opcode": "0100011", "func3": "000", "func7": ""},  
-    "SH":   {"opcode": "0100011", "func3": "001", "func7": ""}  
+    "SW":   {"opcode": "0100011", "func3": "010", "func7": ""}   
 }
 
 riscv_b_type = {  
     "BEQ":  {"opcode": "1100011", "func3": "000", "func7": ""},  
     "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""},  
-    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""},  
-    "BGE":  {"opcode": "1100011", "func3": "101", "func7": ""},  
-    "BLTU": {"opcode": "1100011", "func3": "110", "func7": ""},  
-    "BGEU": {"opcode": "1100011", "func3": "111", "func7": ""}  
-}
-
-riscv_u_type = {  
-    "LUI":   {"opcode": "0110111", "func3": "", "func7": ""},  
-    "AUIPC": {"opcode": "0010111", "func3": "", "func7": ""}  
+    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""}  
 }
 
 riscv_j_type = {  
@@ -51,15 +31,8 @@ riscv_j_type = {
 
 
 def int_to_binary(value, bit_width):
-    """
-    Convert an integer to its two's complement binary representation.
-    
-    :param value: The integer value to convert.
-    :param bit_width: The number of bits to represent the value.
-    :return: A string representing the binary two's complement representation.
-    """
     if value < 0:
-        value = (2 ** bit_width) + value  # Compute two's complement for negative numbers
+        value = (2 ** bit_width) + value
     
     binary_representation = format(value & ((2 ** bit_width) - 1), f'0{bit_width}b')
     return binary_representation
@@ -78,7 +51,7 @@ def get_instruction_type(instr,data):
         info = data.split(',')
         Operands = [info[0],0,0]
         try:
-            if instr in "JALRLW":
+            if instr in "LW":
                 Operands[1] = info[1].split('(')[1].strip(')')
                 Operands[2] = int_to_binary(int(info[1].split('(')[0]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
@@ -110,11 +83,6 @@ def get_instruction_type(instr,data):
                 riscv_b_type[instr]['func3'] + imm_low + riscv_b_type[instr]['opcode'])
         except:
             return "UNKNOWN"
-
-    elif instr in riscv_u_type:
-        rd, imm = data.split(',')
-        imm_bin = int_to_binary(int(imm), 20)   	
-        PC += imm_bin + riscv_registers[rd] + riscv_u_type[instr]['opcode']
         
     elif instr in riscv_j_type:
         try:
