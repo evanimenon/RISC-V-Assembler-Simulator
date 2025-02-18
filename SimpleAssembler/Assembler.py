@@ -30,7 +30,7 @@ riscv_j_type = {
 }
 
 
-def inttobin(value, bit_width):
+def inttobinary(value, bit_width):
     if value < 0:
         value = (2 ** bit_width) + value
     
@@ -53,11 +53,11 @@ def conversion(instr,data):
         try:
             if instr in "LW":
                 Operands[1] = info[1].split('(')[1].strip(')')
-                Operands[2] = inttobin(int(info[1].split('(')[0]),12)
+                Operands[2] = inttobinary(int(info[1].split('(')[0]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
             else:
                 Operands[1] = info[1]
-                Operands[2] = inttobin(int(info[2]),12)
+                Operands[2] = inttobinary(int(info[2]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
         except:
             return "UNKNOWN"
@@ -67,7 +67,7 @@ def conversion(instr,data):
         offset, rs1 = offset_rs1.split('(')
         rs1 = rs1.strip(')')
 
-        imm_bin = inttobin(int(offset), 12)
+        imm_bin = inttobinary(int(offset), 12)
         imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
         PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] +
@@ -76,7 +76,7 @@ def conversion(instr,data):
     elif instr in riscv_b_type:
         try:
             rs1, rs2, offset = data.split(',')
-            imm_bin = inttobin(int(offset), 12)
+            imm_bin = inttobinary(int(offset), 12)
             imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
             PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
@@ -87,7 +87,7 @@ def conversion(instr,data):
     elif instr in riscv_j_type:
         try:
             rd, imm = data.split(',')
-            imm_bin = inttobin(int(imm), 21)
+            imm_bin = inttobinary(int(imm), 21)
             imm_msb  = imm_bin[0]
             imm_high = imm_bin[1:11]
             imm_sep  = imm_bin[11]
@@ -115,6 +115,18 @@ riscv_registers = {
     "s5":"10101", "s6":"10110", "s7":"10111", "s8":"11000", "s9":"11001", "s10":"11010", "s11":"11011", "t3":"11100", "t4":"11101", "t5":"11110", "t6":"11111"
 }
 
+def labels(file_name):
+    L = {}  #{label:address}
+    address = 0
+    f = open(file_name,'r')
+    lines = f.readlines()
+    for line in lines:
+        if (':' in line) and (line not in L) and (' :' not in line):
+            L[line] = address
+            address += 4
+    return L
+
+
 def extract(file_name):
     main={} # general structure to be {address:{operation:data}}
     f = open(file_name,"r")
@@ -123,29 +135,23 @@ def extract(file_name):
         operation = line.split(" ")[0].strip()
         data = line.split(" ")[1].strip()
         main[count] = {operation.strip().upper():data}
-        count+=1
+        count+=4
     f.close()
     return main
 
 def write(main):
     f = open("binary.txt",'w')
     for i,j in main.items():
-<<<<<<< Updated upstream
         for k,g in j.items():
-            bin = get_instruction_type(k,g)
+            bin = conversion(k,g)
             print(bin)
             f.write(bin) 
             f.write("\n")
-=======
-        bin = conversion(i,j)
-        print(bin)
-        f.write(bin) 
-        f.write("\n")
->>>>>>> Stashed changes
     f.close()
     return main
 
-
+L = labels('Ex_test_8.txt')
+print(L)
 main = extract("Ex_test_10.txt")
 
 count = 1
