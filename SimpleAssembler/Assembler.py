@@ -123,7 +123,7 @@ def labels(file_name):
     for line in lines:
         if (':' in line) and (line not in L) and (' :' not in line):
             L[line.split(':')[0]] = address
-            address += 4
+        address += 4
     return L
 
 
