@@ -37,102 +37,81 @@ def inttobinary(value, bit_width):
     binary_representation = format(value & ((2 ** bit_width) - 1), f'0{bit_width}b')
     return binary_representation
     
-
-def conversion(instr,data,main):
+def conversion(instr,data,curr_address):
     PC = ''
     #Checks which type the instruction belongs to
     #note to self: instr and data are both strings
+    is_label = False
+    for key in L:
+        if key in data:
+            is_label = True
     if ":" in instr:
-        label = instr.split(":")[0].strip()
-        instruct = instr.split(":")[1].strip()
-        curr_ad = 0
-        absol_address = 0
-        for i,j in main.items(): # i is address , j is dict of operation and data 
-            for h,g in j.items(): # h is operation and g is data
-                if instr in h:
-                    absol_address = i
-                if label in g:
-                    curr_ad = i
-        imme = absol_address-curr_ad
-        if instruct in riscv_b_type:
-            try:
-                rs1, rs2, offset = data.split(',')
-                imm_bin = inttobinary(int(imme), 12)
-                imm_high, imm_low = imm_bin[:7], imm_bin[7:]
+        instr = (instr.split(":")[1])
+        
+    if instr in riscv_r_type:
+        Operands = data.split(',')
+        PC += riscv_r_type[instr]['func7'] + riscv_registers[Operands[2]] + riscv_registers[Operands[1]] + riscv_r_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_r_type[instr]['opcode']
+        #Above line is for conversion
 
-                PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
-                    riscv_b_type[instr]['func3'] + imm_low + riscv_b_type[instr]['opcode'])
-            except:
-                return "UNKNOWN"
-            
-        elif instruct in riscv_j_type:
-            try:
-                rd, imm = data.split(',')
-                imm_bin = inttobinary(int(imm), 21)
-                imm_msb  = imm_bin[0]
-                imm_high = imm_bin[1:11]
-                imm_sep  = imm_bin[11]
-                imm_low  = imm_bin[12:20]
-                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
-            except:
-                return "UNKNOWN"
-    else:
-        if instr in riscv_r_type:
-            Operands = data.split(',')
-            PC += riscv_r_type[instr]['func7'] + riscv_registers[Operands[2]] + riscv_registers[Operands[1]] + riscv_r_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_r_type[instr]['opcode']
-            #Above line is for conversion
+    elif instr in riscv_i_type:
+        info = data.split(',')
+        Operands = [info[0],0,0]
+        try:
+            if instr in "LW":
+                Operands[1] = info[1].split('(')[1].strip(')')
+                Operands[2] = inttobinary(int(info[1].split('(')[0]),12)
+                PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
+            else:
+                Operands[1] = info[1]
+                Operands[2] = inttobinary(int(info[2]),12)
+                PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
+        except:
+            return "UNKNOWN"
 
-        elif instr in riscv_i_type:
-            info = data.split(',')
-            Operands = [info[0],0,0]
-            try:
-                if instr in "LW":
-                    Operands[1] = info[1].split('(')[1].strip(')')
-                    Operands[2] = inttobinary(int(info[1].split('(')[0]),12)
-                    PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
-                else:
-                    Operands[1] = info[1]
-                    Operands[2] = inttobinary(int(info[2]),12)
-                    PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
-            except:
-                return "UNKNOWN"
+    elif instr in riscv_s_type:
+        rs2, offset_rs1 = data.split(',')
+        offset, rs1 = offset_rs1.split('(')
+        rs1 = rs1.strip(')')
 
-        elif instr in riscv_s_type:
-            rs2, offset_rs1 = data.split(',')
-            offset, rs1 = offset_rs1.split('(')
-            rs1 = rs1.strip(')')
+        imm_bin = inttobinary(int(offset), 12)
+        imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
-            imm_bin = inttobinary(int(offset), 12)
-            imm_high, imm_low = imm_bin[:7], imm_bin[7:]
+        PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] +
+            riscv_s_type[instr]['func3'] + imm_low + riscv_s_type[instr]['opcode'])
 
-            PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] +
-                riscv_s_type[instr]['func3'] + imm_low + riscv_s_type[instr]['opcode'])
-
-        elif instr in riscv_b_type:
-            try:
+    elif instr in riscv_b_type:
+            if not is_label:
                 rs1, rs2, offset = data.split(',')
                 imm_bin = inttobinary(int(offset), 12)
                 imm_high, imm_low = imm_bin[:7], imm_bin[7:]
 
                 PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
                     riscv_b_type[instr]['func3'] + imm_low + riscv_b_type[instr]['opcode'])
-            except:
-                return "UNKNOWN"
-            
-        elif instr in riscv_j_type:
-            try:
-                rd, imm = data.split(',')
-                imm_bin = inttobinary(int(imm), 21)
-                imm_msb  = imm_bin[0]
-                imm_high = imm_bin[1:11]
-                imm_sep  = imm_bin[11]
-                imm_low  = imm_bin[12:20]
-                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
-            except:
-                return "UNKNOWN"
-
-        else:
+            else:
+                rs1, rs2, label = data.split(',')
+                rs1,rs2,label = rs1.strip(),rs2.strip(),label.strip()
+                print(rs1,rs2,label)
+                label_address = L[label]
+                print(label_address,curr_address)
+                imm_bin = (inttobinary((label_address-curr_address)//2, 12))
+                print(imm_bin)
+                imm_bin = imm_bin[::-1]
+                PC += imm_bin[11] + imm_bin[9:3:-1] + riscv_registers[rs2] + riscv_registers[rs1] + riscv_b_type[instr]['func3'] + imm_bin[3::-1] + imm_bin[10] + riscv_b_type[instr]['opcode']
+        
+    elif instr in riscv_j_type:
+        try:
+            rd, imm = data.split(',')
+            imm_bin = inttobinary(int(imm), 21)
+            imm_msb  = imm_bin[0]
+            imm_high = imm_bin[1:11]
+            imm_sep  = imm_bin[11]
+            imm_low  = imm_bin[12:20]
+            PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+        except:
             return "UNKNOWN"
+
+    else:
+        return "UNKNOWN"
     return PC
 
 riscv_registers = {
@@ -167,8 +146,12 @@ def extract(file_name):
     f = open(file_name,"r")
     count = 0
     for line in f:
-        operation = line.split(" ")[0].strip()
-        data = line.split(" ")[1].strip()
+        if ':' in line:
+            operation = line.split(':')[1].split()[0].strip()
+            data = line.split(':')[1].split()[1].strip()
+        else:
+            operation = line.split(" ")[0].strip()
+            data = line.split(" ")[1].strip()
         main[count] = {operation.strip().upper():data}
         count+=4
     f.close()
@@ -178,16 +161,16 @@ def write(main):
     f = open("binary.txt",'w')
     for i,j in main.items():
         for k,g in j.items():
-            bin = conversion(k,g,main)
+            bin = conversion(k,g,i)
             print(bin)
             f.write(bin) 
             f.write("\n")
     f.close()
     return main
 
-L = labels('Ex_test_8.txt')
+L = labels('C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_8.txt')
 print(L)
-main = extract("Ex_test_8.txt")
+main = extract("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_8.txt")
 
 count = 1
 for i,j in main.items():
