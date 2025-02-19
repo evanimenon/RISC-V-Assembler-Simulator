@@ -63,7 +63,7 @@ def conversion(instr,data,curr_address):
             print("INVALID REGISTER(S)")
             print("Line number -",(curr_address+4)//4) 
             quit()
-        if Operands[2] > 2**12 - 1 or Operands[2] < -2**12:
+        if Operands[2] < -(curr_address):
             print("INVALID IMMEDIATE VALUE")
             print("Line number -",(curr_address+4)//4)
             quit()
@@ -88,7 +88,7 @@ def conversion(instr,data,curr_address):
             print("INVALID REGISTER(S)")
             print("Line number -",(curr_address+4)//4)
             quit()
-        if offset > 2**12 - 1 or offset < -2**12:
+        if offset < -(curr_address):
             print("INVALID IMMEDIATE VALUE")
             print("Line number -",(curr_address+4)//4)
             quit()
@@ -109,7 +109,7 @@ def conversion(instr,data,curr_address):
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                if offset > 2**12 - 1 or offset < -2**12:
+                if offset < -(curr_address):
                     print("INVALID IMMEDIATE VALUE")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -142,7 +142,7 @@ def conversion(instr,data,curr_address):
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                if imm > 2**12 - 1 or imm < -2**12:
+                if imm < -(curr_address):
                     print("INVALID IMMEDIATE VALUE")
                     print("Line number -",(curr_address+4)//4)
                     quit()
