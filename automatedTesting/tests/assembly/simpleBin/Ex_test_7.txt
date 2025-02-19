@@ -1,3 +1,4 @@
+xor s0,s0,s0
 addi s0,s0,1
 sub t3,zero,s0
 add s1,s0,s0
