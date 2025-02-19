@@ -41,40 +41,40 @@ def conversion(instr,data,curr_address):
     #Checks which type the instruction belongs to
     #note to self: instr and data are both strings
     is_label = False
-    for key in L:
+    for key in L:                               #Checks for label headers and label calls, truth and false on a variable to check for this
         if key in data:
             is_label = True
     if ":" in instr:
         instr = (instr.split(":")[1])
         
-    if instr in riscv_r_type:
+    if instr in riscv_r_type:                   #If instruction is r type
         Operands = data.split(',')
-        if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers or Operands[2] not in riscv_registers:
+        if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers or Operands[2] not in riscv_registers:          #Error testing, if register is invalid
             print("INVALID REGISTER(S)")
             quit()
         PC += riscv_r_type[instr]['func7'] + riscv_registers[Operands[2]] + riscv_registers[Operands[1]] + riscv_r_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_r_type[instr]['opcode']
         #Above line is for conversion
 
-    elif instr in riscv_i_type:
+    elif instr in riscv_i_type:                 #If instruction is i type
         info = data.split(',')
-        Operands = [info[0],0,0]
+        Operands = [info[0],0,0]                #Format is different to r type
         
         try:
-            if instr in "LW":
+            if instr in "LW":                                                                           #Handles the different format of LW specifically
                 Operands[1] = info[1].split('(')[1].strip(')')
                 if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4) 
-                    quit()
+                    quit()                                                                              #Error handling for underflow and invalid registers
                 if int(info[1].split('(')[0]) < -(curr_address):
                     print("INVALID IMMEDIATE VALUE")
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 Operands[2] = inttobinary(int(info[1].split('(')[0]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
-            else:
+            else:                                                                                       #Other i type instructions are handled here
                 Operands[1] = info[1]
-                if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
+                if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:            #More error handling
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4) 
                     quit()
@@ -106,13 +106,13 @@ def conversion(instr,data,curr_address):
         PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] +
             riscv_s_type[instr]['func3'] + imm_low + riscv_s_type[instr]['opcode'])
 
-    elif instr in riscv_b_type:
+    elif instr in riscv_b_type:                                                 #If instruction is b type
         try:
-            if not is_label:
+            if not is_label:                                                                            #Checks label call exists
                 rs1, rs2, offset = data.split(',')
                 imm_bin = inttobinary(int(offset), 12)
                 imm_high, imm_low = imm_bin[:7], imm_bin[7:]
-                if rs1 not in riscv_registers or rs2 not in riscv_registers:
+                if rs1 not in riscv_registers or rs2 not in riscv_registers:                            #error handling
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -123,10 +123,10 @@ def conversion(instr,data,curr_address):
 
                 PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
                     riscv_b_type[instr]['func3'] + imm_low + riscv_b_type[instr]['opcode'])
-            else:
+            else:                                                                                       #Label exists
                 rs1, rs2, label = data.split(',')
                 rs1,rs2,label = rs1.strip(),rs2.strip(),label.strip()
-                if rs1 not in riscv_registers or rs2 not in riscv_registers:
+                if rs1 not in riscv_registers or rs2 not in riscv_registers:                        #Error handling
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -134,17 +134,17 @@ def conversion(instr,data,curr_address):
                     print(label,"LABEL NOT DEFINED")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                label_address = L[label]
-                imm_bin = (inttobinary((label_address-curr_address)//2, 12))[::-1]
+                label_address = L[label]                                                            #Get label address
+                imm_bin = (inttobinary((label_address-curr_address)//2, 12))[::-1]                  #Numerical value of imm
                 PC += imm_bin[11] + imm_bin[9:3:-1] + riscv_registers[rs2] + riscv_registers[rs1] + riscv_b_type[instr]['func3'] + imm_bin[3::-1] + imm_bin[10] + riscv_b_type[instr]['opcode']
         except:
             print("An error has occured")
             quit()
     elif instr in riscv_j_type:
         try:
-            if not is_label:
+            if not is_label:                                                #No label
                 rd, imm = data.split(',')
-                if rd not in riscv_registers:
+                if rd not in riscv_registers:                                   #Error handling
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -154,10 +154,10 @@ def conversion(instr,data,curr_address):
                     quit()
                 imm_bin = inttobinary(int(imm), 21)
                 PC += imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + riscv_registers[rd] + riscv_j_type[instr]['opcode']
-            else:
+            else:                                                               #Label exists
                 rd, label = data.split(',')
-                rd,label = rd.strip(),label.strip()
-                if rd not in riscv_registers:
+                rd,label = rd.strip(),label.strip()                             
+                if rd not in riscv_registers:                                   #error handling
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -165,8 +165,8 @@ def conversion(instr,data,curr_address):
                     print(label,"LABEL NOT DEFINED")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                label_address = L[label]
-                imm_bin = (inttobinary((label_address-curr_address), 21))
+                label_address = L[label]                                        #Address of label
+                imm_bin = (inttobinary((label_address-curr_address), 21))       #Numerical value of imm
                 if label_address-curr_address < 0:
                     imm_bin = '1' + imm_bin[:20]
                 PC += imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + riscv_registers[rd] + riscv_j_type[instr]['opcode']
@@ -194,12 +194,12 @@ riscv_registers = {
     "s5":"10101", "s6":"10110", "s7":"10111", "s8":"11000", "s9":"11001", "s10":"11010", "s11":"11011", "t3":"11100", "t4":"11101", "t5":"11110", "t6":"11111"
 }
 
-def labels(file_name):
+def labels(file_name):                                  #Parces the entire file to check for every label header
     L = {}  #{label:address}
     address = 0
     f = open(file_name,'r')
     lines = f.readlines()
-    if "beq zero,zero,0" not in lines[-1]:
+    if "beq zero,zero,0" not in lines[-1]:                      #Checks if final halt is applicable(only to stop garbage instructions from running after execution)
         print("Invalid last line")
         quit()
     for line in lines:
