@@ -236,9 +236,9 @@ def write(main):
     f.close()
     return main
 
-L = labels("C:\\Users\\nandi\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_9.txt")
+L = labels("Ex_test_9.txt")
 print(L)
-main = extract("C:\\Users\\nandi\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_9.txt")
+main = extract("Ex_test_9.txt")
 
 count = 1
 for i,j in main.items():
