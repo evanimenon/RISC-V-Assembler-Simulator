@@ -22,7 +22,8 @@ riscv_s_type = {
 riscv_b_type = {  
     "BEQ":  {"opcode": "1100011", "func3": "000", "func7": ""},  
     "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""},  
-    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""}  
+    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""},
+    "BGE":  {"opcode": "1100011", "func3": "101", "func7": ""}   
 }
 
 riscv_j_type = {  
@@ -136,8 +137,7 @@ def conversion(instr,data,curr_address):
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 label_address = L[label]
-                imm_bin = (inttobinary((label_address-curr_address)//2, 12))
-                imm_bin = imm_bin[::-1]
+                imm_bin = (inttobinary((label_address-curr_address)//2, 12))[::-1]
                 PC += imm_bin[11] + imm_bin[9:3:-1] + riscv_registers[rs2] + riscv_registers[rs1] + riscv_b_type[instr]['func3'] + imm_bin[3::-1] + imm_bin[10] + riscv_b_type[instr]['opcode']
         except:
             print("An error has occured")
@@ -150,16 +150,12 @@ def conversion(instr,data,curr_address):
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                if imm < -(curr_address):
+                if int(imm) < -(curr_address):
                     print("INVALID IMMEDIATE VALUE")
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 imm_bin = inttobinary(int(imm), 21)
-                imm_msb  = imm_bin[0]
-                imm_high = imm_bin[1:11]
-                imm_sep  = imm_bin[11]
-                imm_low  = imm_bin[12:20]
-                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+                PC += imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + riscv_registers[rd] + riscv_j_type[instr]['opcode']
             else:
                 rd, label = data.split(',')
                 rd,label = rd.strip(),label.strip()
@@ -172,12 +168,11 @@ def conversion(instr,data,curr_address):
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 label_address = L[label]
-                imm_bin = (inttobinary((label_address-curr_address)//2, 20))[::-1]
-                imm_msb  = imm_bin[19]
-                imm_high = imm_bin[9::-1]
-                imm_sep  = imm_bin[10]
-                imm_low  = imm_bin[18:10:-1]
-                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+                print(label_address-curr_address)
+                imm_bin = (inttobinary((label_address-curr_address), 21))
+                if label_address-curr_address < 0:
+                    imm_bin = '1' + imm_bin[:20]
+                PC += imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + riscv_registers[rd] + riscv_j_type[instr]['opcode']
                 
         except:
             return "UNKNOWN"
@@ -211,7 +206,7 @@ def labels(file_name):
         print("Invalid last line")
         quit()
     for line in lines:
-        if (':' in line) and (line not in L) and (' :' not in line):
+        if (':' in line) and (line.split(':')[0] not in L) and (' :' not in line):
             L[line.split(':')[0]] = address
         address += 4
     return L
@@ -247,7 +242,7 @@ ifile = str(sys.argv[1])
 ofile = str(sys.argv[2])
 L = labels(ifile)
 main = extract(ifile)
-
+print(L)
 count = 1
 for i,j in main.items():
     count+=1
