@@ -209,31 +209,31 @@ def labels(file_name):
     return L
 
 
-def extract(file_name):
+def extract(file_name): # purpose of this fuction is to read from file and extract data into dictionary for analysis
     main={} # general structure to be {address:{operation:data}}
-    f = open(file_name,"r")
-    count = 0
+    f = open(file_name,"r") # opens set file name
+    count = 0 # count used to set address values
     for line in f:
-        if ':' in line:
-            operation = line.split(':')[1].split()[0].strip()
-            data = line.split(':')[1].split()[1].strip()
-        else:
-            operation = line.split(" ")[0].strip()
-            data = line.split(" ")[1].strip()
-        main[count] = {operation.strip().upper():data}
-        count+=4
-    f.close()
-    return main
+        if ':' in line: # checks for : to detect labels
+            operation = line.split(':')[1].split()[0].strip() # takes LHS
+            data = line.split(':')[1].split()[1].strip() # takes RHS
+        else: # if no labels then splits normally no special case
+            operation = line.split(" ")[0].strip() # takes LHS
+            data = line.split(" ")[1].strip() # takes RHS
+        main[count] = {operation.strip().upper():data} # adds operation and data to dictionary
+        count+=4 # increases count by 4 to do address 
+    f.close() # closes file
+    return main # returns dictionary of operations and data
 
-def write(main,ofile):
-    f = open(ofile,'w')
-    for i,j in main.items():
-        for k,g in j.items():
-            bin = conversion(k,g,i)
-            f.write(bin) 
-            f.write("\n")
-    f.close()
-    return main
+def write(main,ofile): # purpose of this is to calculate the binary instruction wise and write it to output file
+    f = open(ofile,'w') # opens given output file
+    for i,j in main.items(): # loops over dict, i = address, j = dict of operation and data
+        for k,g in j.items(): # k = operation, g = data
+            bin = conversion(k,g,i) # puts in operation, data and address to calculate binary
+            f.write(bin) # writes binary to file for the instruction
+            f.write("\n") # moves to next line
+    f.close() # closes file
+    return main # returns dict - not really needed.
 
 ifile = str(sys.argv[1])
 ofile = str(sys.argv[2])
