@@ -1,0 +1,8 @@
+addi s2,s2,2
+addi s3,s3,4
+add s2,s2,s3
+sub s3,s2,s3
+sub s2,s2,s3
+sw s2,38(s8)
+sw s3,43(s6)
+beq zero,zero,0

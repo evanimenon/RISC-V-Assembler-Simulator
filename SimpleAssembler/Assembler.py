@@ -80,6 +80,7 @@ def conversion(instr,data,curr_address):
             riscv_s_type[instr]['func3'] + imm_low + riscv_s_type[instr]['opcode'])
 
     elif instr in riscv_b_type:
+        try:
             if not is_label:
                 rs1, rs2, offset = data.split(',')
                 imm_bin = inttobinary(int(offset), 12)
@@ -90,23 +91,34 @@ def conversion(instr,data,curr_address):
             else:
                 rs1, rs2, label = data.split(',')
                 rs1,rs2,label = rs1.strip(),rs2.strip(),label.strip()
-                print(rs1,rs2,label)
                 label_address = L[label]
-                print(label_address,curr_address)
                 imm_bin = (inttobinary((label_address-curr_address)//2, 12))
-                print(imm_bin)
                 imm_bin = imm_bin[::-1]
                 PC += imm_bin[11] + imm_bin[9:3:-1] + riscv_registers[rs2] + riscv_registers[rs1] + riscv_b_type[instr]['func3'] + imm_bin[3::-1] + imm_bin[10] + riscv_b_type[instr]['opcode']
+        except:
+            return "UNKNOWN"
         
     elif instr in riscv_j_type:
         try:
-            rd, imm = data.split(',')
-            imm_bin = inttobinary(int(imm), 21)
-            imm_msb  = imm_bin[0]
-            imm_high = imm_bin[1:11]
-            imm_sep  = imm_bin[11]
-            imm_low  = imm_bin[12:20]
-            PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+            if not is_label:
+                rd, imm = data.split(',')
+                imm_bin = inttobinary(int(imm), 21)
+                imm_msb  = imm_bin[0]
+                imm_high = imm_bin[1:11]
+                imm_sep  = imm_bin[11]
+                imm_low  = imm_bin[12:20]
+                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+            else:
+                rd, label = data.split(',')
+                rd,label = rd.strip(),label.strip()
+                label_address = L[label]
+                imm_bin = (inttobinary((label_address-curr_address)//2, 21))
+                imm_msb  = imm_bin[0]
+                imm_high = imm_bin[1:11]
+                imm_sep  = imm_bin[11]
+                imm_low  = imm_bin[12:20]
+                PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
+                
         except:
             return "UNKNOWN"
 
@@ -168,9 +180,9 @@ def write(main):
     f.close()
     return main
 
-L = labels('C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_8.txt')
+L = labels("C:\\Users\\nandi\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_9.txt")
 print(L)
-main = extract("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_8.txt")
+main = extract("C:\\Users\\nandi\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_9.txt")
 
 count = 1
 for i,j in main.items():

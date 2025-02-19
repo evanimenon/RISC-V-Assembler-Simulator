@@ -1,0 +1,10 @@
+lw a4,30(s3)
+add s2,s3,s4
+sub s2,s2,s2
+jalr ra,a4,-03
+addi s4,s3,1
+sw s4,23(s4)
+sub s9,s1,s3
+or s1,s9,s7
+srl s10,a2,a4
+beq zero,zero,0
