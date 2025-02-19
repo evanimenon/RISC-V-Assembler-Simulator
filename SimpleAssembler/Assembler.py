@@ -50,12 +50,24 @@ def conversion(instr,data,curr_address):
         
     if instr in riscv_r_type:
         Operands = data.split(',')
+        if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers or Operands[2] not in riscv_registers:
+            print("INVALID REGISTER(S)")
+            quit()
         PC += riscv_r_type[instr]['func7'] + riscv_registers[Operands[2]] + riscv_registers[Operands[1]] + riscv_r_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_r_type[instr]['opcode']
         #Above line is for conversion
 
     elif instr in riscv_i_type:
         info = data.split(',')
         Operands = [info[0],0,0]
+        if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
+            print("INVALID REGISTER(S)")
+            print("Line number -",(curr_address+4)//4) 
+            quit()
+        if Operands[2] > 2**12 - 1 or Operands[2] < -2**12:
+            print("INVALID IMMEDIATE VALUE")
+            print("Line number -",(curr_address+4)//4)
+            quit()
+        
         try:
             if instr in "LW":
                 Operands[1] = info[1].split('(')[1].strip(')')
@@ -72,6 +84,14 @@ def conversion(instr,data,curr_address):
         rs2, offset_rs1 = data.split(',')
         offset, rs1 = offset_rs1.split('(')
         rs1 = rs1.strip(')')
+        if rs1 not in riscv_registers or rs2 not in riscv_registers:
+            print("INVALID REGISTER(S)")
+            print("Line number -",(curr_address+4)//4)
+            quit()
+        if offset > 2**12 - 1 or offset < -2**12:
+            print("INVALID IMMEDIATE VALUE")
+            print("Line number -",(curr_address+4)//4)
+            quit()
 
         imm_bin = inttobinary(int(offset), 12)
         imm_high, imm_low = imm_bin[:7], imm_bin[7:]
@@ -85,12 +105,28 @@ def conversion(instr,data,curr_address):
                 rs1, rs2, offset = data.split(',')
                 imm_bin = inttobinary(int(offset), 12)
                 imm_high, imm_low = imm_bin[:7], imm_bin[7:]
+                if rs1 not in riscv_registers or rs2 not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
+                if offset > 2**12 - 1 or offset < -2**12:
+                    print("INVALID IMMEDIATE VALUE")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
 
                 PC += (imm_high + riscv_registers[rs2] + riscv_registers[rs1] + 
                     riscv_b_type[instr]['func3'] + imm_low + riscv_b_type[instr]['opcode'])
             else:
                 rs1, rs2, label = data.split(',')
                 rs1,rs2,label = rs1.strip(),rs2.strip(),label.strip()
+                if rs1 not in riscv_registers or rs2 not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
+                if label not in L:
+                    print(label,"LABEL NOT DEFINED")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
                 label_address = L[label]
                 imm_bin = (inttobinary((label_address-curr_address)//2, 12))
                 imm_bin = imm_bin[::-1]
@@ -102,6 +138,14 @@ def conversion(instr,data,curr_address):
         try:
             if not is_label:
                 rd, imm = data.split(',')
+                if rd not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
+                if imm > 2**12 - 1 or imm < -2**12:
+                    print("INVALID IMMEDIATE VALUE")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
                 imm_bin = inttobinary(int(imm), 21)
                 imm_msb  = imm_bin[0]
                 imm_high = imm_bin[1:11]
@@ -111,6 +155,14 @@ def conversion(instr,data,curr_address):
             else:
                 rd, label = data.split(',')
                 rd,label = rd.strip(),label.strip()
+                if rd not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
+                if label not in L:
+                    print(label,"LABEL NOT DEFINED")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
                 label_address = L[label]
                 imm_bin = (inttobinary((label_address-curr_address)//2, 21))
                 imm_msb  = imm_bin[0]
@@ -123,7 +175,8 @@ def conversion(instr,data,curr_address):
             return "UNKNOWN"
 
     else:
-        return "UNKNOWN"
+        print("INVALID OPERATION")
+        print("Line number -",(curr_address+4)//4)
     return PC
 
 riscv_registers = {
@@ -146,6 +199,9 @@ def labels(file_name):
     address = 0
     f = open(file_name,'r')
     lines = f.readlines()
+    if "beq zero,zero,0" not in lines[-1]:
+        print("Invalid last line")
+        quit()
     for line in lines:
         if (':' in line) and (line not in L) and (' :' not in line):
             L[line.split(':')[0]] = address
