@@ -233,8 +233,8 @@ def extract(file_name):
     f.close()
     return main
 
-def write(main):
-    f = open("binary.txt",'w')
+def write(main,ofile):
+    f = open(ofile,'w')
     for i,j in main.items():
         for k,g in j.items():
             bin = conversion(k,g,i)
@@ -244,12 +244,14 @@ def write(main):
     f.close()
     return main
 
-L = labels("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_0.txt")
+ifile = str(sys.argv[1])
+ofile = str(sys.argv[2])
+L = labels(ifile)
 print(L)
-main = extract("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_0.txt")
+main = extract(ifile)
 
 count = 1
 for i,j in main.items():
     print(i,"-",j)
     count+=1
-write(main)
+write(main,ofile)
