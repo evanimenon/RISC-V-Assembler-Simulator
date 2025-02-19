@@ -238,7 +238,6 @@ def write(main,ofile):
     for i,j in main.items():
         for k,g in j.items():
             bin = conversion(k,g,i)
-            print(bin)
             f.write(bin) 
             f.write("\n")
     f.close()
@@ -247,7 +246,6 @@ def write(main,ofile):
 ifile = str(sys.argv[1])
 ofile = str(sys.argv[2])
 L = labels(ifile)
-print(L)
 main = extract(ifile)
 
 count = 1
