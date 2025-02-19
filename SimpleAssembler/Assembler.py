@@ -21,9 +21,7 @@ riscv_s_type = {
 
 riscv_b_type = {  
     "BEQ":  {"opcode": "1100011", "func3": "000", "func7": ""},  
-    "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""},  
-    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""},
-    "BGE":  {"opcode": "1100011", "func3": "101", "func7": ""}   
+    "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""}  
 }
 
 riscv_j_type = {  
@@ -168,7 +166,6 @@ def conversion(instr,data,curr_address):
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 label_address = L[label]
-                print(label_address-curr_address)
                 imm_bin = (inttobinary((label_address-curr_address), 21))
                 if label_address-curr_address < 0:
                     imm_bin = '1' + imm_bin[:20]
@@ -242,7 +239,6 @@ ifile = str(sys.argv[1])
 ofile = str(sys.argv[2])
 L = labels(ifile)
 main = extract(ifile)
-print(L)
 count = 1
 for i,j in main.items():
     count+=1
