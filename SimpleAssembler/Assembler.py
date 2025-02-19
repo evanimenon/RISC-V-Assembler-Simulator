@@ -250,6 +250,5 @@ main = extract(ifile)
 
 count = 1
 for i,j in main.items():
-    print(i,"-",j)
     count+=1
 write(main,ofile)
