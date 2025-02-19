@@ -59,22 +59,30 @@ def conversion(instr,data,curr_address):
     elif instr in riscv_i_type:
         info = data.split(',')
         Operands = [info[0],0,0]
-        if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
-            print("INVALID REGISTER(S)")
-            print("Line number -",(curr_address+4)//4) 
-            quit()
-        if Operands[2] < -(curr_address):
-            print("INVALID IMMEDIATE VALUE")
-            print("Line number -",(curr_address+4)//4)
-            quit()
         
         try:
             if instr in "LW":
                 Operands[1] = info[1].split('(')[1].strip(')')
+                if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4) 
+                    quit()
+                if int(info[1].split('(')[0]) < -(curr_address):
+                    print("INVALID IMMEDIATE VALUE")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
                 Operands[2] = inttobinary(int(info[1].split('(')[0]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
             else:
                 Operands[1] = info[1]
+                if Operands[0] not in riscv_registers or Operands[1] not in riscv_registers:
+                    print("INVALID REGISTER(S)")
+                    print("Line number -",(curr_address+4)//4) 
+                    quit()
+                if int(info[2]) < -(curr_address):
+                    print("INVALID IMMEDIATE VALUE")
+                    print("Line number -",(curr_address+4)//4)
+                    quit()
                 Operands[2] = inttobinary(int(info[2]),12)
                 PC += Operands[2] + riscv_registers[Operands[1]] + riscv_i_type[instr]['func3'] + riscv_registers[Operands[0]] + riscv_i_type[instr]['opcode']
         except:
@@ -88,7 +96,7 @@ def conversion(instr,data,curr_address):
             print("INVALID REGISTER(S)")
             print("Line number -",(curr_address+4)//4)
             quit()
-        if offset < -(curr_address):
+        if int(offset) < -(curr_address):
             print("INVALID IMMEDIATE VALUE")
             print("Line number -",(curr_address+4)//4)
             quit()
@@ -109,7 +117,7 @@ def conversion(instr,data,curr_address):
                     print("INVALID REGISTER(S)")
                     print("Line number -",(curr_address+4)//4)
                     quit()
-                if offset < -(curr_address):
+                if int(offset) < -(curr_address):
                     print("INVALID IMMEDIATE VALUE")
                     print("Line number -",(curr_address+4)//4)
                     quit()
@@ -132,8 +140,8 @@ def conversion(instr,data,curr_address):
                 imm_bin = imm_bin[::-1]
                 PC += imm_bin[11] + imm_bin[9:3:-1] + riscv_registers[rs2] + riscv_registers[rs1] + riscv_b_type[instr]['func3'] + imm_bin[3::-1] + imm_bin[10] + riscv_b_type[instr]['opcode']
         except:
-            return "UNKNOWN"
-        
+            print("An error has occured")
+            quit()
     elif instr in riscv_j_type:
         try:
             if not is_label:
@@ -164,11 +172,11 @@ def conversion(instr,data,curr_address):
                     print("Line number -",(curr_address+4)//4)
                     quit()
                 label_address = L[label]
-                imm_bin = (inttobinary((label_address-curr_address)//2, 21))
-                imm_msb  = imm_bin[0]
-                imm_high = imm_bin[1:11]
-                imm_sep  = imm_bin[11]
-                imm_low  = imm_bin[12:20]
+                imm_bin = (inttobinary((label_address-curr_address)//2, 20))[::-1]
+                imm_msb  = imm_bin[19]
+                imm_high = imm_bin[9::-1]
+                imm_sep  = imm_bin[10]
+                imm_low  = imm_bin[18:10:-1]
                 PC += imm_msb + imm_high + imm_sep + imm_low + riscv_registers[rd] + riscv_j_type[instr]['opcode']
                 
         except:
@@ -236,9 +244,9 @@ def write(main):
     f.close()
     return main
 
-L = labels("Ex_test_9.txt")
+L = labels("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_0.txt")
 print(L)
-main = extract("Ex_test_9.txt")
+main = extract("C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\SimpleAssembler\\Ex_test_0.txt")
 
 count = 1
 for i,j in main.items():
