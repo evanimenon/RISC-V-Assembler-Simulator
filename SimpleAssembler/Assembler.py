@@ -21,9 +21,7 @@ riscv_s_type = {
 
 riscv_b_type = {  
     "BEQ":  {"opcode": "1100011", "func3": "000", "func7": ""},  
-    "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""},  
-    "BLT":  {"opcode": "1100011", "func3": "100", "func7": ""},
-    "BGE":  {"opcode": "1100011", "func3": "101", "func7": ""}   
+    "BNE":  {"opcode": "1100011", "func3": "001", "func7": ""}
 }
 
 riscv_j_type = {  
