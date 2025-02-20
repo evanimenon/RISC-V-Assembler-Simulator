@@ -35,7 +35,14 @@ def inttobinary(value, bit_width):
     
     binary_representation = format(value & ((2 ** bit_width) - 1), f'0{bit_width}b')
     return binary_representation
-    
+
+'''conversion fn takes a risc-v assembly instruction, operands, and PC address as input
+it converts the given instruction (r,i,s,j,b types) into its 32-bit binary repesentation
+also performs error checking so that registers and immediate values are valid
+if a label is referenced, the function resolves it using a dictionary L that stores label addresses
+inttobinary() converts immediate values into binary 
+depending on the instruction type, the function assembles the binary representation by combining opcode, function codes, and register values
+if an invalid instruction/operand is encountered, it prints an error message and stops execution. final binary instruction is returned as a string.'''
 def conversion(instr,data,curr_address):
     PC = '' #stores the final binary conversion
     #Checks which type the instruction belongs to
