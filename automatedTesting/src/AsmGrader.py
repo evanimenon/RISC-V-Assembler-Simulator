@@ -8,7 +8,7 @@ import os
 class AsmGrader(Grader):
 
 	# simple test 0.1 x 10
-	SIMPLE_MARKS = 0.1
+	SIMPLE_MARKS = 0.2
 	# Hard test 0.2 x 5
 	HARD_MARKS = 0.2
 

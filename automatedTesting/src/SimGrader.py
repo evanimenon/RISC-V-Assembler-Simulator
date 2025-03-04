@@ -8,9 +8,9 @@ import os
 class SimGrader(Grader):
 
 	# 0.2 x 10
-	SIMPLE_MARKS = 4/6 #0.2
+	SIMPLE_MARKS = 2    #4/6 #0.2
 	# 0.8 x 5
-	HARD_MARKS = 0.8
+	HARD_MARKS = 1
 
 	BIN_HARD_DIR = "hard"
 	BIN_SIMPLE_DIR = "simple"
