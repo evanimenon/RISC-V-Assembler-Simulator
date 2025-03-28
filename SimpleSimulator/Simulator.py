@@ -41,6 +41,35 @@ def sign_extend(value, bits):
         value -= (1 << bits)  # Convert to negative
     return value
 
+def addi(instr):
+    rd = int(instr[15:20], 2)
+    imm = sign_extend(int(instr[:12], 2), 12)
+    rs = int(instr[20:25],2)
+    registers[rd] = registers[rs] + imm
+    return 
+
+def b_type(instr):
+    global PC
+    imm = instr[0] + instr[24] + instr[1:7] + instr[20:24]+ "0"
+    imm = sign_extend(int(imm, 2), 13)
+    func = instr[17:20]
+    rs1 = instr[12:17]
+    rs2 = instr[7:12]
+    
+    if func == '000':    #BEQ
+        if registers[rs1] == registers[rs2]:
+            PC = PC + imm
+            return
+    elif func == '001':       #BNE
+        if registers[rs1] != registers[rs2]:
+            PC = PC + imm
+            return
+    
+    PC+=4
+
+
+    
+    
 def decode_execute(instr, output_lines):
     """ Decodes the binary instruction and executes it. """
     global PC
