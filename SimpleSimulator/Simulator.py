@@ -112,19 +112,6 @@ def i_type(instr):
     else:
         print("Error")
 
-def s_type(instr):
-    rs1 = int(instr[12:17],2)
-    rs2 = int(instr[7:12],2)
-    imm = instr[:7] + instr[20:25]
-    imm = sign_extend(int(imm,2),12)
-
-
-    Address = int(registers[rs1][2:],2) + imm
-    Address = f"{Address & 0xFFFFFFFF:08x}"
-    Address = Address.upper()
-    Address = '0x' + Address
-    memory[Address] = registers[rs2]
-
 
 def b_type(instr):
     global PC
@@ -168,9 +155,17 @@ def decode_execute(instr, output_lines):
         r_type(instr)
 
     elif opcode == "0100011":  # SW (Store Word)
-        imm_s = sign_extend(int(instr[:7] + instr[20:25], 2), 12)  # Split S-type immediate
-        address = registers[rs1] + imm_s
-        memory[address] = registers[rs2]  # Store to memory
+        rs1 = int(instr[12:17],2)
+        rs2 = int(instr[7:12],2)
+        imm = instr[:7] + instr[20:25]
+        imm = sign_extend(int(imm,2),12)
+
+
+        Address = int(registers[rs1][2:],2) + imm
+        Address = f"{Address & 0xFFFFFFFF:08x}"
+        Address = Address.upper()
+        Address = '0x' + Address
+        memory[Address] = registers[rs2]
 
     elif opcode == "1100011":  # Branch Instructions beq and bne
         b_type(instr)
