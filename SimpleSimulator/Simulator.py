@@ -2,7 +2,7 @@ import os
 import sys
 
 # Initialize registers (32 registers, initially all zeros)
-registers = [0] * 32
+registers = ['0b' + '0'*32] * 32 #Initialize them all has binary with value 0
 memory = {}  # Dictionary for memory (key = address, value = 32-bit data as string)
 PC = 0  # Program Counter starts at 0
 
@@ -84,9 +84,23 @@ def i_type(instr):
     
     if funct3=="010":
         if opcode=="0000011": # LW
-            # put code here emad
+            if instr[-7:] == '0000011':
+                imm = instr[:12]
+                imm = sign_extend(int(imm,2),12)
+                print(imm)
+                Address = int(registers[rs1][2:],2) + imm
+                Address = f"{Address & 0xFFFFFFFF:08x}"
+                Address = Address.upper()
+                Address = '0x' + Address
+            if Address in memory:
+                registers[rd] = memory[Address][2:]
+            else:
+                memory[Address] = '0b00000000000000000000000000000000'
+                registers[rd] = '0'*32
         else:
             print("Error")
+
+
     elif funct3=="000": 
         if opcode=="0010011":  # ADDI
             registers[rd] = registers[rs1] + imm
@@ -97,6 +111,19 @@ def i_type(instr):
             print("Error")
     else:
         print("Error")
+
+def s_type(instr):
+    rs1 = int(instr[12:17],2)
+    rs2 = int(instr[7:12],2)
+    imm = instr[:7] + instr[20:25]
+    imm = sign_extend(int(imm,2),12)
+
+
+    Address = int(registers[rs1][2:],2) + imm
+    Address = f"{Address & 0xFFFFFFFF:08x}"
+    Address = Address.upper()
+    Address = '0x' + Address
+    memory[Address] = registers[rs2]
 
 
 def b_type(instr):
