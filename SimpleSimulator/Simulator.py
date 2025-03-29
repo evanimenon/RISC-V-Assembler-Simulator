@@ -148,7 +148,7 @@ def decode_execute(instr, output_lines):
     global PC
     opcode = instr[-7:]
 
-    if opcode == "0010011" | opcode == "0000011" | opcode == "1100111":  # I-Type Instructions
+    if opcode == "0010011" or opcode == "0000011" or opcode == "1100111":  # I-Type Instructions
         i_type(instr)
 
     elif opcode == "0110011":  # R-Type Instructions
