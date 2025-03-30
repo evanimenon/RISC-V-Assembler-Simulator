@@ -2,9 +2,11 @@ import os
 import sys
 
 # Initialize registers (32 registers, initially all zeros)
-registers = ['0b' + '0'*32] * 32 #Initialize them all has binary with value 0
+registers = [0] * 32 #Initialize them all has binary with value 0
 memory = {}  # Dictionary for memory (key = address, value = 32-bit data as string)
-PC = 0  # Program Counter starts at 0
+for i in range(65536,65661,4):
+    memory[f"{i & 0xFFFFFFFF:08x}"] = '0b' + '0'*32   #Memory initialization with given range
+PC = 4  # Program Counter starts at 4
 
 def load_instructions(file_name):
     """ Reads binary instructions from file into a list. """
@@ -87,16 +89,14 @@ def i_type(instr):
             if instr[-7:] == '0000011':
                 imm = instr[:12]
                 imm = sign_extend(int(imm,2),12)
-                print(imm)
-                Address = int(registers[rs1][2:],2) + imm
+                Address = registers[rs1] + imm
                 Address = f"{Address & 0xFFFFFFFF:08x}"
                 Address = Address.upper()
                 Address = '0x' + Address
             if Address in memory:
-                registers[rd] = memory[Address][2:]
+                registers[rd] = int(memory[Address][2:],2)
             else:
-                memory[Address] = '0b00000000000000000000000000000000'
-                registers[rd] = '0'*32
+                registers[rd] = 0
         else:
             print("Error")
 
@@ -118,19 +118,18 @@ def b_type(instr):
     imm = instr[0] + instr[24] + instr[1:7] + instr[20:24]+ "0"
     imm = sign_extend(int(imm, 2), 13)
     func = instr[17:20]
-    rs1 = instr[12:17]
-    rs2 = instr[7:12]
+    rs1 = int(instr[12:17],2)
+    rs2 = int(instr[7:12],2)
     
     if func == '000':    #BEQ
         if registers[rs1] == registers[rs2]:
-            PC = PC + imm
+            PC += imm
             return
     elif func == '001':       #BNE
         if registers[rs1] != registers[rs2]:
-            PC = PC + imm
+            PC += imm
             return
-    
-    PC+=4
+    PC += 4
 
 
 def j_type(instr): # JAL
@@ -139,7 +138,8 @@ def j_type(instr): # JAL
     # opcode = instr[25:32]
     rd = int(instr[20:25],2)
     registers[rd] = PC + 4
-    PC = (PC + imm) & ~1
+    #PC = (PC + imm) & ~1
+    PC += 4*imm
     
     
     
@@ -150,9 +150,11 @@ def decode_execute(instr, output_lines):
 
     if opcode == "0010011" or opcode == "0000011" or opcode == "1100111":  # I-Type Instructions
         i_type(instr)
+        PC += 4
 
     elif opcode == "0110011":  # R-Type Instructions
         r_type(instr)
+        PC += 4
 
     elif opcode == "0100011":  # SW (Store Word)
         rs1 = int(instr[12:17],2)
@@ -161,11 +163,12 @@ def decode_execute(instr, output_lines):
         imm = sign_extend(int(imm,2),12)
 
 
-        Address = int(registers[rs1][2:],2) + imm
+        Address = registers[rs1] + imm
         Address = f"{Address & 0xFFFFFFFF:08x}"
         Address = Address.upper()
         Address = '0x' + Address
-        memory[Address] = registers[rs2]
+        memory[Address] = f"0b{registers[rs2] & 0xFFFFFFFF:032b}"
+        PC += 4
 
     elif opcode == "1100011":  # Branch Instructions beq and bne
         b_type(instr)
@@ -177,21 +180,33 @@ def decode_execute(instr, output_lines):
         output_lines.append(f"Unknown instruction: {instr}")
 
     register_state = " ".join(f"{registers[i]:032b}" for i in range(32))
-    output_lines.append(f"PC: {PC:08x} {register_state}")
-    PC += 4
+    output_lines.append(f"{PC:08x} {register_state}")
+    print("PC after instr: ",PC)
+
 
 
 
 if __name__ == "__main__":
-    file_name = "SimpleSimulator/simple/simple_1.txt"
+    file_name = "SimpleSimulator/simple/simple_5.txt"
     instructions = load_instructions(file_name)
     
     if instructions:
+        prev_PC = 0
+        Halt_Check = 0
         output_lines = []
-        for instr in instructions:
-            decode_execute(instr, output_lines)
+        # for instr in instructions:
+        #     decode_execute(instr, output_lines)
+        while PC < 4*len(instructions):
+            print("Running instruction at address:",PC)
+            prev_PC = PC
+            decode_execute(instructions[PC//4 - 1],output_lines)
+            if prev_PC == PC:
+                print("Program HALTED")
+                break
 
         with open("out.txt", "w") as outfile:
             outfile.write("\n".join(output_lines))
+            for Address in memory:
+                outfile.write("\n".join(Address + ':' + memory[Address]))
 
         #output written to out.txt
