@@ -1,0 +1,2 @@
+
+                print(Address + ':' + memory[Address])

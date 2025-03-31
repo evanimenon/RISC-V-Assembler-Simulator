@@ -6,6 +6,8 @@ registers = [0] * 32 #Initialize them all has binary with value 0
 memory = {}  # Dictionary for memory (key = address, value = 32-bit data as string)
 for i in range(65536,65661,4):
     memory[f"{i & 0xFFFFFFFF:08x}"] = '0b' + '0'*32   #Memory initialization with given range
+
+print(memory)
 PC = 4  # Program Counter starts at 4
 
 def load_instructions(file_name):
@@ -139,7 +141,7 @@ def j_type(instr): # JAL
     rd = int(instr[20:25],2)
     registers[rd] = PC + 4
     #PC = (PC + imm) & ~1
-    PC += 4*imm
+    PC += imm
     
     
     
@@ -167,7 +169,8 @@ def decode_execute(instr, output_lines):
         Address = f"{Address & 0xFFFFFFFF:08x}"
         Address = Address.upper()
         Address = '0x' + Address
-        memory[Address] = f"0b{registers[rs2] & 0xFFFFFFFF:032b}"
+        if Address in memory:
+            memory[Address] = f"0b{registers[rs2] & 0xFFFFFFFF:032b}"
         PC += 4
 
     elif opcode == "1100011":  # Branch Instructions beq and bne
@@ -179,17 +182,19 @@ def decode_execute(instr, output_lines):
     else:
         output_lines.append(f"Unknown instruction: {instr}")
 
-    register_state = " ".join(f"{registers[i]:032b}" for i in range(32))
-    output_lines.append(f"{PC:08x} {register_state}")
+    register_state = " ".join(
+    f"{registers[i] & 0xFFFFFFFF:032b}" if registers[i] >= 0 else f"{(registers[i] + (1 << 32)) & 0xFFFFFFFF:032b}" for i in range(32))
+
+    output_lines.append(f"{PC:032b} {register_state}")
     print("PC after instr: ",PC)
 
 
 
 
 if __name__ == "__main__":
-    file_name = "SimpleSimulator/simple/simple_5.txt"
+    file_name = "SimpleSimulator/simple/simple_3.txt"
     instructions = load_instructions(file_name)
-    
+
     if instructions:
         prev_PC = 0
         Halt_Check = 0
@@ -200,6 +205,7 @@ if __name__ == "__main__":
             print("Running instruction at address:",PC)
             prev_PC = PC
             decode_execute(instructions[PC//4 - 1],output_lines)
+            print(" ".join(f"{registers[i]}" for i in range(32)))
             if prev_PC == PC:
                 print("Program HALTED")
                 break
@@ -207,6 +213,9 @@ if __name__ == "__main__":
         with open("out.txt", "w") as outfile:
             outfile.write("\n".join(output_lines))
             for Address in memory:
-                outfile.write("\n".join(Address + ':' + memory[Address]))
+                outfile.write('\n')
+                outfile.write('0x' + Address + ':' + memory[Address])
+
 
         #output written to out.txt
+    
