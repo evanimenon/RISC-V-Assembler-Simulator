@@ -26,8 +26,6 @@ def load_instructions(file_name):
                 binary_instr = line.strip()
                 if binary_instr:
                     instructions.append(binary_instr)
-        
-        #print(f"Loaded {len(instructions)} instructions.")
         return instructions
 
     except Exception as e:
@@ -148,7 +146,6 @@ def b_type(instr):
 def j_type(instr): # JAL
     global PC
     imm = sign_extend(int(instr[0] + instr[12:20] + instr[11] + instr[1:11] + "0", 2), 21)
-    # opcode = instr[25:32]
     rd = int(instr[20:25],2)
     if rd:
         registers[rd] = PC + 4
@@ -157,7 +154,6 @@ def j_type(instr): # JAL
     else:
         print("INVALID JUMP(JAL)")
         quit()
-    #PC += imm
     
     
     
@@ -202,77 +198,49 @@ def decode_execute(instr, output_lines):
         output_lines.append(f"Unknown instruction: {instr}")
 
     register_state = " ".join(f"0b{registers[i] & 0xFFFFFFFF:032b}" if registers[i] >= 0 else f"0b{(registers[i] + (1 << 32)) & 0xFFFFFFFF:032b}" for i in range(32))
-    #register_state = " ".join(f"{registers[i]}" for i in range(32))
     PC = (PC//4)*4
     output_lines.append(f"0b{PC:032b} {register_state}")
 
+#bonus part Q3
 
+def rst():
+    registers = [0]*32
 
+def mul(instr):
+    rs2 = int(instr[7:12], 2)
+    rs1 = int(instr[12:17], 2)
+    rd = int(instr[20:25], 2)
+    registers[rd] = registers[rs1] * registers[rs2]
+
+def halt():
+    quit()
+
+def rvrs(instr):
+    rs1 = int(instr[12:17],2)
+    bin_rs1 = f"{registers[rs1] & 0xFFFFFFFF:08x}"
+    bin_rs1 = bin_rs1[::-1]
+    rd = int(instr[20:25], 2)
+    registers[rd] = int(bin_rs1,2)
 
 if __name__ == "__main__":
     ifile = str(sys.argv[1])
     ofile = str(sys.argv[2])
-    # ifile = 'C:\\Users\\essam\\OneDrive\\Documents\\GitHub\\CO-Project\\automatedTesting\\tests\\bin\\simple\\simple_10.txt'
-    # ofile = 'out.txt'
     instructions = load_instructions(ifile)
-#     instructions = ['00000000000100000000000010010011',
-# '00000000001000000000100100010011',
-# '01000000000000000000000110010011',   
-# '00000000001100011000000110110011',
-# '00000000001100011000000110110011',
-# '00000000001100011000000110110011',
-# '00000000001100011000000110110011',
-# '00000000001100011000000110110011',
-# '00000000001100011000000110110011',
-# '00000000100000000000110011101111',
-# '00000001001000001000110010110011',
-# '00000000000000000000000100110011',
-# '00000000110000000000000100010011',
-# '00000001011100000000100010010011',
-# '00000001000110001000100010110011',
-# '00000001000110001000100010110011',
-# '00000001000110001000100010110011',
-# '00000001000110001000100010110011',
-# '00000001000100010000000100110011',
-# '11111111110000010000000100010011',
-# '00000000000100010010000000100011',
-# '11111111110000010000000100010011',
-# '00000001001000010010000000100011',
-# '00000000000000010010110000000011',
-# '00000001100000011010000000100011',
-# '00000000010000010000000100010011',
-# '00000000000000010010110000000011',
-# '00000001100000011010001000100011',
-# '00000000000000000000000001100011']
-
     if instructions:
         count1= 0
         prev_PC = 0
         Halt_Check = 0
         output_lines = []
-        # for instr in instructions:
-        #     decode_execute(instr, output_lines)
         while PC < 4*len(instructions):
             prev_PC = PC
             decode_execute(instructions[PC//4],output_lines)
-            #print(registers)
             if prev_PC == PC:
                 break
 
-        # final_PCb = output_lines[-1].split()
-        # final_PC = int(final_PCb[0][2:],2)
-        # final_PC += 4
-        # final_PCb[0]= f"0b{final_PC & 0xFFFFFFFF:032b}"
-        # str1 = " ".join(final_PCb)
-        # output_lines[-1] = str1
         with open(ofile,'w') as outfile:
-            #print(output_lines[-1])
             outfile.write(" \n".join(output_lines))
             outfile.write(' ')
             i = 65536
-            # for Address in stack_memory:
-            #     memory[f"{i & 0xFFFFFFFF:08x}".upper()] = stack_memory[Address]
-            #     i += 4
             for Address in memory:
                 outfile.write('\n')
                 outfile.write(Address + ':' + memory[Address])
