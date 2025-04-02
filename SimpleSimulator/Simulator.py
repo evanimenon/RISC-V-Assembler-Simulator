@@ -13,6 +13,20 @@ for i in range(65536,65661,4):
     memory['0x' + s] = '0b' + '0'*32   #Memory initialization with given range
 PC = 0  # Program Counter starts at 0
 
+valid_opcode_func3_func7 = [("0110011", "000", "0000000"),
+                ("0110011", "000", "0100000"),
+                ("0110011", "111", "0000000"),
+                ("0110011", "110", "0000000"),
+                ("0110011", "101", "0000000"),
+                ("0110011", "010", "0000000"),
+                ("0010011", "000", ""),
+                ("0000011", "010", ""),
+                ("1100111", "000", ""),
+                ("0100011", "010", ""),
+                ("1100011", "000", ""),
+                ("1100011", "001", ""),
+                ("1101111", "", "")]
+
 def load_instructions(file_name):
     """ Reads binary instructions from file into a list. """
     instructions = []
@@ -161,6 +175,20 @@ def decode_execute(instr, output_lines):
     """ Decodes the binary instruction and executes it. """
     global PC
     opcode = instr[-7:]
+    
+    if opcode == "1101111":   #jal has no func3 or func7
+        func3=""
+        func7=""
+    elif opcode == "0110011":   #r-type has both func3 and func7
+        func3=instr[17:20]
+        func7=instr[:7]
+    else:                      #all other types have only func3 and no func7
+        func3=instr[17:20]
+        func7=""
+    
+    if (opcode, func3, func7) not in valid_opcode_func3_func7:
+        print(f"Error: Invalid combination of opcode = {opcode}, func3 = {func3}, func7 = {func7}")
+        quit()
 
     if opcode == "0010011" or opcode == "0000011" or opcode == "1100111":  # I-Type Instructions
         i_type(instr)
@@ -195,10 +223,14 @@ def decode_execute(instr, output_lines):
         j_type(instr)
     
     else:
-        output_lines.append(f"Unknown instruction: {instr}")
+        print(f"Unknown instruction: {instr}")
+        quit()
 
+    if PC%4 !=0:
+        print(f"PC value {PC} is not a multiple of 4")
+        quit()
+        
     register_state = " ".join(f"0b{registers[i] & 0xFFFFFFFF:032b}" if registers[i] >= 0 else f"0b{(registers[i] + (1 << 32)) & 0xFFFFFFFF:032b}" for i in range(32))
-    PC = (PC//4)*4
     output_lines.append(f"0b{PC:032b} {register_state}")
 
 #bonus part Q3
