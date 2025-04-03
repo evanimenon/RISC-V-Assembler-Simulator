@@ -39,6 +39,13 @@ def load_instructions(file_name):
             for line in infile:
                 binary_instr = line.strip()
                 if binary_instr:
+                    if(len(binary_instr)!=32):
+                        print(f"Invalid Instruction {binary_instr}. Instruction should be 32 bits.")
+                        quit()
+                    for char in binary_instr:
+                        if char not in "01":
+                            print(f"Invalid characters present in instruction {binary_instr}. Instruction should be in binary.")
+                            quit()
                     instructions.append(binary_instr)
         return instructions
 
@@ -223,7 +230,7 @@ def decode_execute(instr, output_lines):
         j_type(instr)
     
     else:
-        print(f"Unknown instruction: {instr}")
+        print(f"Unknown opcode in instruction: {instr}")
         quit()
 
     if PC%4 !=0:
